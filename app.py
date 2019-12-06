@@ -32,20 +32,23 @@ def handlePostData():
         # parsing raw data
         # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
         rawData = request.data.decode('UTF-8')
+        print(rawData)
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
             for atomicData in data.split(','):
                 subArray.append(atomicData)
-
             exploitableData.append(subArray)
     except (Exception, psycopg2.Error) as error :
         print(error)
+        exploitableData = None
     finally:
         if exploitableData != None:
             availableData = exploitableData
-
-        return exploitableData
+            stringifiedArray = ''.join(str(x) for x in exploitableData)
+            return stringifiedArray
+        else:
+            return 'no data'
 
 # start to send asynchronous data
 # async_sendSimulationDataToIOT()
