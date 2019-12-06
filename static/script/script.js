@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () =>
     locationsCoordinates = [];
 
     let mymap = setupLeaflet();
-    // fetchAndDisplayIncendie(mymap); // fetch first set of data
-    //async_gatherDataRegularly(5000, mymap);
+    fetchAndDisplayIncendie(mymap); // fetch first set of data
+    async_gatherDataRegularly(1000, mymap);
 });
 
 
@@ -55,13 +55,6 @@ function setupLeaflet ()
             accessToken
         }
     ).addTo(mymap);
-
-    // var circle = L.circle([45.74846, 4.84671], {
-    //     color: 'red',
-    //     fillColor: '#f03',
-    //     fillOpacity: 0.5,
-    //     radius: 500
-    // }).addTo(mymap);
 
     // add controls to the map
     const customControl_hideFire = L.Control.extend({
@@ -95,80 +88,7 @@ function setupLeaflet ()
     });
     mymap.addControl(new customControl_hideFire);
 
-    const customControl_hideTruck = L.Control.extend({
-        options: {
-            position: 'topright'
-        },
-
-        onAdd: function(map) {
-            let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-hide-truck');
-            container.style.backgroundColor = 'white';
-            container.style.width = '30px';
-            container.style.height = '30px';
-            
-            container.style.backgroundImage = 'url("' + IMG_PATH + 'camion.gif")';
-            container.style.backgroundSize = "30px 30px";
-        
-            container.onclick = function(){
-                const areMarkersShown = renderedMarkers.truckMarkers.areShown;
-                for (let marker of renderedMarkers.truckMarkers.markers) {
-                    if (areMarkersShown) {
-                        renderedMarkers.truckMarkers.areShown = false;
-                        mymap.removeLayer(marker)
-                    } else {
-                        renderedMarkers.truckMarkers.areShown = true;
-                        mymap.addLayer(marker)
-                    }
-                }
-            }
-            return container;
-        }
-    });
-    mymap.addControl(new customControl_hideTruck);
-
-    // test
-    const start = [45.54846, 4.84671];
-    const end = [45.94846, 4.84671];
-    fetchAndDisplayRoute(start, end, mymap);
-
     return mymap;
-}
-
-
-// --------------------------------------------------------------------------------------------------------------
-// @brief
-//  The [latitude, longitude]'s order contained in 'array' is swaped by this function
-function swapLatLong (array) { return [array[1], array[0]] }
-
-
-// --------------------------------------------------------------------------------------------------------------
-// @brief
-//  Fetches the route computed by the OSRM online and free engine and displays it on the leaflet map 'mymap'
-// @note
-//  The 'from' and 'to' variables are arrays containing latitude and longitude data
-// If the OSRM API can't give me a valid route, then the marker will simply travel in a straight line to its target
-function fetchAndDisplayRoute (from, to, mymap) 
-{
-    const travelTime = 20000; // the time it takes to get to the destination (in ms)
-    fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full`)
-    .then(r => r.json()).then(data => {
-        try {
-            data.routes.map(m => {
-                let decodedPolyline = L.polyline(
-                    polyline.decode(m.geometry), {
-                    color: 'red',
-                    weight: 3,
-                    opacity: 1
-                });
-                decodedPolyline.addTo(mymap);
-                renderedPolylines.push(decodedPolyline);
-                addMovingFiretruck(decodedPolyline['_latlngs'], travelTime, mymap);
-            });
-        } catch(e) {
-            console.error('Too many calls to the OSRM API. Try again later ('+e+')')
-            addMovingFiretruck([from, to], travelTime, mymap);
-        }
-    });
 }
 
 
@@ -235,71 +155,16 @@ function addFirestationMarker (coordinates, mymap) {
 
 // --------------------------------------------------------------------------------------------------------------
 // @brief
-//  Adds a marker in the Leaflet map 'mymap' form the coordinates 'start' to 'end' and a duration of 'duration'
-// expressed in milliseconds
-function addMovingFiretruck (steps, duration, mymap) 
-{
-    const movingMarkerIcon = L.icon({
-        iconUrl: IMG_PATH + 'camion.gif',
-        iconSize:     [60, 47], // size of the icon
-        iconAnchor:   [30, 30], // point of the icon which will correspond to marker's location
-        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-    });
-
-    const firestationIcon = L.icon({
-        iconUrl: IMG_PATH + 'firestation.jpg',
-        iconSize:     [60, 90], // size of the icon
-        iconAnchor:   [30, 60], // point of the icon which will correspond to marker's location
-        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-    });
-
-    const fireIcon = L.icon({
-        iconUrl: IMG_PATH + 'fire/fire1.gif',
-        iconSize:     [60, 90], // size of the icon
-        iconAnchor:   [30, 70], // point of the icon which will correspond to marker's location
-        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-    });
-
-    // drawing the line the moving marker will follow
-    let coordinateArray = [...steps];
-    let myPolyline = L.polyline(coordinateArray);
-    myPolyline.addTo(mymap);
-    renderedPolylines.push(myPolyline);
-
-    // adding start & end markers
-    let startMarker = L.marker(coordinateArray[0], {icon: firestationIcon}).addTo(mymap);
-    let endMarker = L.marker(coordinateArray[coordinateArray.length - 1], {icon: fireIcon}).addTo(mymap);
-    renderedMarkers.buildingMarker.markers.push(startMarker);
-    renderedMarkers.fireMarkers.markers.push(endMarker);
-
-    // here is the moving marker (6 seconds animation)
-    let movingFiretruck = L.Marker.movingMarker(
-        coordinateArray, 
-        duration, 
-        { 
-            autostart: false,
-            icon: movingMarkerIcon
-        }
-    );
-
-    // on arrival tu coco
-    movingFiretruck.addEventListener('end', () => {
-        console.log('ze sui arrivé')
-    })
-
-    mymap.addLayer(movingFiretruck);
-    renderedMarkers.truckMarkers.markers.push(movingFiretruck);
-    movingFiretruck.start();
-}
-
-
-// --------------------------------------------------------------------------------------------------------------
-// @brief
 //  Fetches all the incendie data from the PostgreSQL database and displays them inside the Leaflet map 'mymap'
 async function fetchAndDisplayIncendie (mymap) {
-    fetch('http://127.0.0.1:5000/data').then(r => r.json()).then(data => 
+    fetch('http://127.0.0.1:5000/get').then(r => r.json()).then(data => 
     {
-        updateIncendieData(data, mymap)
+        try {
+            data = JSON.parse(data);
+            updateIncendieData(data, mymap)
+        } catch(e) {
+            // ...
+        }
     })
     .catch(e => { console.error(e) })
 }
@@ -324,9 +189,6 @@ function updateIncendieData (newDataset, mymap)
             addFireMarker(coordinates, intensity, mymap)
         else
             addIdleMarker(coordinates, mymap)
-
-        const start = [45.54846, 4.84671];
-        addMovingFiretruck([start, coordinates], rand(20000, 30000), mymap);
     }
 }
 
