@@ -10,6 +10,8 @@ import time
 import json
 import os
 
+# the data you can access via /get and set the value through /set
+global availableData
 availableData = []
 
 # ROUTING
@@ -23,10 +25,12 @@ def root():
 
 @app.route('/get')
 def API_BASIC():
+    print(availableData)
     return jsonify(availableData)
 
 @app.route('/set', methods=['POST'])
 def handlePostData():
+    global availableData
     exploitableData = None
     try:
         # parsing raw data
