@@ -25,7 +25,6 @@ def root():
 
 @app.route('/get')
 def API_BASIC():
-    print(availableData)
     return jsonify(availableData)
 
 @app.route('/set', methods=['POST'])
@@ -36,7 +35,6 @@ def handlePostData():
         # parsing raw data
         # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
         rawData = request.data.decode('UTF-8')
-        print(rawData)
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
