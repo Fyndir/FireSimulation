@@ -23,7 +23,7 @@ def root():
 
 @app.route('/get')
 def API_BASIC():
-    return jsonify()
+    return jsonify(availableData)
 
 @app.route('/set', methods=['POST'])
 def handlePostData():
@@ -44,7 +44,7 @@ def handlePostData():
     finally:
         if exploitableData != None:
             availableData = exploitableData
-            
+
         return exploitableData
 
 # start to send asynchronous data
