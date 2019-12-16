@@ -27,7 +27,7 @@ def root():
 def API_BASIC():
     return jsonify(availableData)
 
-@app.route('/set', methods=['POST'])
+@app.route('/send', methods=['POST'])
 def handlePostData():
     global availableData
     exploitableData = None
