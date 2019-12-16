@@ -96,9 +96,12 @@ function setupLeaflet ()
 // @brief
 //  Adds an idle site marker in the Leaflet map 'mymap' at coordinates [lat, long] represented by the 'coordinates'
 // argument, in the 'mymap' Leaflet map
-function addIdleMarker (coordinates, mymap) {
+function addIdleMarker (coordinates, mymap) 
+{
+    const fileName = latLongToFileName(coordinates);
+    console.log(fileName)
     const idleMarkerIcon = L.icon({
-        iconUrl: IMG_PATH + `buildings/building(${rand(1,199)}).png`,
+        iconUrl: IMG_PATH + fileName,
         iconSize:     [40, 30], // size of the icon
         iconAnchor:   [30, 30], // point of the icon which will correspond to marker's location
         popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
@@ -159,6 +162,8 @@ function addFirestationMarker (coordinates, mymap) {
 async function fetchAndDisplayIncendie (mymap) {
     fetch('http://127.0.0.1:5000/get').then(r => r.json()).then(data => 
     {
+        console.log('GOT DATA')
+        console.log(data)
         if (data.length > 0)
             updateIncendieData(data, mymap)
     })
@@ -179,7 +184,6 @@ function updateIncendieData (newDataset, mymap)
     locationsCoordinates = newDataset;
     clearMap(mymap);
     for (let triplet of locationsCoordinates) {
-        console.log('triplet')
         let coordinates = [triplet[0], triplet[1] * rand(2, 3)];
         let intensity = triplet[2];
         if (intensity > 0)
@@ -237,4 +241,36 @@ function rand(min, max){
 	const _min = Math.ceil(min);
     const _max = Math.floor(max);
     return Math.floor(Math.random() * (_max - _min + 1)) + _min;
+}
+
+
+// -----------------------------------------------------------------------------------------------------
+// @brief
+//  Maps a number from a range [in_min ; in_max] to a new range [out_min ; out_max]
+function map(num, in_min, in_max, out_min, out_max) {
+	return (num -in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
+// -----------------------------------------------------------------------------------------------------
+// @brief
+//  Associates to the [latitude, longitude] 'latLong' array a unique file name to be able to alaways have
+// the same file name associated to the doublet
+function latLongToFileName (latLong) {
+    const uniqueDoubletIdentifier = latLong[0] + latLong[1];
+    console.log('unique: ' + uniqueDoubletIdentifier)
+    console.log('mapped unique: ' + map(uniqueDoubletIdentifier, 0, 100, 0, 2))
+    const fileNumber = parseInt(map(uniqueDoubletIdentifier, 0, 100, 0, 2));
+    const fileName = `buildings/building(${fileNumber}).png`;
+    return fileName;
+}
+
+
+// -----------------------------------------------------------------------------------------------------
+// @brief
+//  Returns the number of decimals of the number 'num'
+function countDecimals (num) {
+    if (Math.floor(num) !== num)
+        return num.toString().split(".")[1].length || 0;
+    return 0;
 }
