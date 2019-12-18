@@ -37,6 +37,7 @@ def handlePostData():
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
         rawData = request.data.decode('UTF-8')
+        print(request.data)
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
@@ -56,7 +57,7 @@ def handlePostData():
             stringifiedArray = ''.join(str(x) for x in exploitableData)
             return stringifiedArray
         else:
-            return 'no data'
+            raise NameError('PAS DE DATA')
 
 # start to send asynchronous data
 # async_sendSimulationDataToIOT()
