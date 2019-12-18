@@ -42,16 +42,19 @@ def handlePostData():
         for data in rawData.split(';'):
             subArray = []
             for atomicData in data.split(','):
-                subArray.append(atomicData)
+                if (len(atomicData) > 0):
+                    subArray.append(atomicData)
 
-            exploitableData.append(subArray)
+            # array integrity check
+            if (len(subArray) == 3):
+                exploitableData.append(subArray)
     
         # updateFireDatabase(exploitableData)
     except (Exception, psycopg2.Error) as error :
         print(error)
         exploitableData = None
     finally:
-        if exploitableData != None:
+        if exploitableData != None and len(exploitableData) > 0:
             availableData = exploitableData
             stringifiedArray = ''.join(str(x) for x in exploitableData)
             return stringifiedArray
