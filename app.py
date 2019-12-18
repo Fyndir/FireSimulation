@@ -27,20 +27,34 @@ def root():
 def API_BASIC():
     return jsonify(availableData)
 
+
 @app.route('/send', methods=['POST'])
 def handlePostData():
     global availableData
     exploitableData = None
+    rawData = 'no data'
+
+    # parsing raw data
+    # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
-        # parsing raw data
-        # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
+        # si les données ont été envoyées en raw
         rawData = request.data.decode('UTF-8')
-        exploitableData = []
-        for data in rawData.split(';'):
-            subArray = []
-            for atomicData in data.split(','):
-                subArray.append(atomicData)
-            exploitableData.append(subArray)
+        if (len(rawData) > 0):
+            exploitableData = []
+            for data in rawData.split(';'):
+                subArray = []
+                for atomicData in data.split(','):
+                    subArray.append(atomicData)
+
+                exploitableData.append(subArray)
+
+        # sinon, elles ont été envoyées par Java's HTTP handler, et donc
+        # un couple clé/valeur
+        else:
+            rawData = request.args
+            return 'on était dans couple valeur lol'
+    
+        # updateFireDatabase(exploitableData)
     except (Exception, psycopg2.Error) as error :
         print(error)
         exploitableData = None
