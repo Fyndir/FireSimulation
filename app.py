@@ -33,7 +33,7 @@ def handlePostData():
     global availableData
     exploitableData = None
     rawData = 'no data'
-    return 'grosse merde'
+    return request.data
 
     # parsing raw data
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
