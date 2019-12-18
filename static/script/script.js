@@ -17,6 +17,15 @@ let renderedMarkers = {
 };
 let renderedPolylines = [];
 
+// associe à un couple [lat,long] un filename. Voilà à quoi il ressemble
+// [
+//   {
+//      coord: [lat, long],
+//      filename: 'aaa.png'
+//   },
+// ]
+let coordToFilenameMAP = [];
+
 // --------------------------------------------------------------------------------------------------------------
 // @brief
 // This iz where de fun beginz
@@ -25,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () =>
     console.log('> Document loaded');
 
     // reset
+    coordToFilenameMAP = [];
     locationsCoordinates = [];
 
     let mymap = setupLeaflet();
@@ -99,7 +109,6 @@ function setupLeaflet ()
 function addIdleMarker (coordinates, mymap) 
 {
     const fileName = latLongToFileName(coordinates);
-    console.log(fileName)
     const idleMarkerIcon = L.icon({
         iconUrl: IMG_PATH + fileName,
         iconSize:     [40, 30], // size of the icon
@@ -162,8 +171,6 @@ function addFirestationMarker (coordinates, mymap) {
 async function fetchAndDisplayIncendie (mymap) {
     fetch('https://cpefiresimulation.azurewebsites.net/get').then(r => r.json()).then(data => 
     {
-        console.log('GOT DATA')
-        console.log(data)
         if (data.length > 0)
             updateIncendieData(data, mymap)
     })
@@ -184,7 +191,7 @@ function updateIncendieData (newDataset, mymap)
     locationsCoordinates = newDataset;
     clearMap(mymap);
     for (let triplet of locationsCoordinates) {
-        let coordinates = [triplet[0], triplet[1] * rand(2, 3)];
+        let coordinates = [triplet[0], triplet[1]];
         let intensity = triplet[2];
         if (intensity > 0)
             addFireMarker(coordinates, intensity, mymap)
@@ -256,12 +263,38 @@ function map(num, in_min, in_max, out_min, out_max) {
 // @brief
 //  Associates to the [latitude, longitude] 'latLong' array a unique file name to be able to alaways have
 // the same file name associated to the doublet
-function latLongToFileName (latLong) {
-    const uniqueDoubletIdentifier = latLong[0] + latLong[1];
-    console.log('unique: ' + uniqueDoubletIdentifier)
-    console.log('mapped unique: ' + map(uniqueDoubletIdentifier, 0, 100, 0, 2))
-    const fileNumber = parseInt(map(uniqueDoubletIdentifier, 0, 100, 0, 2));
-    const fileName = `buildings/building(${fileNumber}).png`;
+function latLongToFileName (latLong) 
+{
+    // this function returns true if doublet1 === doublet2, false sinon
+    // (?) gros, Javascript est pas capable de le faire tout seul. Alors, je le fais pour lui !
+    let areDoubletEqual = (doublet1, doublet2) => { return doublet1[0] === doublet2[0] && doublet1[1] === doublet2[1] }
+
+    // en premier, on cherche si on n'a pas déjà associé un filename
+    for (let association of coordToFilenameMAP) {
+        if (areDoubletEqual(latLong, association.coord))
+            return association.filename;
+    }
+
+    // sinon, on l'associe.
+    let hassAssociated = false;
+    let filename;
+    while (!hassAssociated)
+    {
+        // build filename
+        const fileNumber = rand(1, 199);
+        fileName = `buildings/building(${fileNumber}).png`;
+
+        // check if filename already associated
+        hassAssociated = true;
+        for (let association of coordToFilenameMAP) {
+            if (association.fileName === latLong)
+                hassAssociated = false;
+                continue;
+        }
+
+        coordToFilenameMAP.push({ coord: latLong, filename: fileName});
+    }
+
     return fileName;
 }
 
