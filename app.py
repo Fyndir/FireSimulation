@@ -33,11 +33,11 @@ def handlePostData():
     global availableData
     exploitableData = None
     rawData = 'no data'
+    return 'grosse merde'
 
     # parsing raw data
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
-        return 'grosse merde'
         rawData = request.data.decode('UTF-8')
         exploitableData = []
         for data in rawData.split(';'):
