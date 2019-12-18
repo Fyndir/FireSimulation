@@ -37,7 +37,7 @@ def handlePostData():
     # parsing raw data
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
-        return request.data
+        return request.values
         rawData = request.data.decode('UTF-8')
         exploitableData = []
         for data in rawData.split(';'):
