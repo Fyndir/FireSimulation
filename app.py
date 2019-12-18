@@ -14,6 +14,17 @@ import os
 global availableData
 availableData = []
 
+
+# ---------------------------------------------------------------------------------------------
+# @brief
+#  Returns True if 'stringo' is an integer or a float, Flase otherwise
+def isStringIntOrFloat(stringo):
+    if stringo.isdigit():
+        return True
+    if stringo.replace('.', '', 1).isdigit() and stringo.count('.') < 2:
+        return True
+    return False
+
 # ROUTING
 app = Flask(__name__, static_folder='static/')
 # cors = CORS(app, resources={r"*": {"origins": "*"}})
@@ -37,15 +48,19 @@ def handlePostData():
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
         rawData = request.data.decode('UTF-8')
-        print(request.data)
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
+            print('\n')
             for atomicData in data.split(','):
-                if (len(atomicData) > 0 and atomicData.isnumeric()):
+                print(atomicData)
+                print('length: ', len(atomicData))
+                print('is it int or float: ', isStringIntOrFloat(atomicData))
+                if len(atomicData) > 0 and isStringIntOrFloat(atomicData):
                     subArray.append(atomicData)
 
             # array integrity check
+            print('array length: ', len(subArray))
             if (len(subArray) == 3):
                 exploitableData.append(subArray)
             else :
@@ -59,7 +74,7 @@ def handlePostData():
             stringifiedArray = ''.join(str(x) for x in exploitableData)
             return stringifiedArray
         else:
-            raise NameError('PAS DE DATA')
+            return 'no data'
 
 # start to send asynchronous data
 # async_sendSimulationDataToIOT()
