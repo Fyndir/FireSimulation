@@ -31,7 +31,7 @@ def API_BASIC():
 def handlePostData():
     global availableData
     exploitableData = None
-    rawData = 'no data'
+    rawData = ''
 
     # parsing received data
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
@@ -48,6 +48,8 @@ def handlePostData():
             # array integrity check
             if (len(subArray) == 3):
                 exploitableData.append(subArray)
+            else :
+                raise NameError('Mauvais typage')
     except (Exception, psycopg2.Error) as error :
         print(error)
         exploitableData = None
