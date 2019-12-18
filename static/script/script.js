@@ -170,6 +170,7 @@ function addFirestationMarker (coordinates, mymap) {
 //  Fetches all the incendie data from the PostgreSQL database and displays them inside the Leaflet map 'mymap'
 async function fetchAndDisplayIncendie (mymap) {
     fetch('https://cpefiresimulation.azurewebsites.net/get').then(r => r.json()).then(data => 
+    // fetch('http://127.0.0.1:5000/get').then(r => r.json()).then(data => 
     {
         if (data.length > 0)
             updateIncendieData(data, mymap)

@@ -27,37 +27,31 @@ def root():
 def API_BASIC():
     return jsonify(availableData)
 
-
 @app.route('/send', methods=['POST'])
 def handlePostData():
     global availableData
     exploitableData = None
     rawData = 'no data'
 
-    # parsing raw data
+    # parsing received data
     # (?) should look like that: 1,2,3;4,5,6;7,8,9[...]
     try:
-
-        return request.args
-
         rawData = request.data.decode('UTF-8')
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
             for atomicData in data.split(','):
-                if (len(atomicData) > 0):
+                if (len(atomicData) > 0 and atomicData.isnumeric()):
                     subArray.append(atomicData)
 
             # array integrity check
             if (len(subArray) == 3):
                 exploitableData.append(subArray)
-    
-        # updateFireDatabase(exploitableData)
     except (Exception, psycopg2.Error) as error :
         print(error)
         exploitableData = None
     finally:
-        if exploitableData != None and len(exploitableData) > 0:
+        if exploitableData != None:
             availableData = exploitableData
             stringifiedArray = ''.join(str(x) for x in exploitableData)
             return stringifiedArray
