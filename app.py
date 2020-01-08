@@ -49,17 +49,33 @@ def handlePostData():
     try:
         rawData = request.data.decode('UTF-8')
         exploitableData = []
-        for data in rawData.split(';'):
+
+        # if there was no delimiter (aka on a envoyé qu'un seul triplet)
+        splittedData = rawData.split(';')
+        if splittedData[0] == rawData:
             subArray = []
-            for atomicData in data.split(','):
+            for atomicData in splittedData[0].split(','):
                 if len(atomicData) > 0 and isStringIntOrFloat(atomicData):
                     subArray.append(atomicData)
 
             # array integrity check
             if (len(subArray) == 3):
                 exploitableData.append(subArray)
-            else :
-                raise NameError('Mauvais typage')
+
+        # sinon, on a envoyé plusieurs triplets, donc simplement faut les traiter un par un
+        else:
+            print('envoyé plusieurs triplets')
+            for data in rawData.split(';'):
+                subArray = []
+                for atomicData in data.split(','):
+                    if len(atomicData) > 0 and isStringIntOrFloat(atomicData):
+                        subArray.append(atomicData)
+
+                # array integrity check
+                if (len(subArray) == 3):
+                    exploitableData.append(subArray)
+                else :
+                    raise NameError('Mauvais typage')
     except (Exception, psycopg2.Error) as error :
         print(error)
         exploitableData = None
