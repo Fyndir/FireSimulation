@@ -48,9 +48,9 @@ header {
 	}
 
 footer {
-	height: 5vh;
-	min-height: 5vh;
-	max-height: 5vh;
+	height: 8vh;
+	min-height: 8vh;
+	max-height: 8vh;
     background-color: rgba(192, 57, 43, .3);
 }
 

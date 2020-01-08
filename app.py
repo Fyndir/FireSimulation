@@ -51,16 +51,11 @@ def handlePostData():
         exploitableData = []
         for data in rawData.split(';'):
             subArray = []
-            print('\n')
             for atomicData in data.split(','):
-                print(atomicData)
-                print('length: ', len(atomicData))
-                print('is it int or float: ', isStringIntOrFloat(atomicData))
                 if len(atomicData) > 0 and isStringIntOrFloat(atomicData):
                     subArray.append(atomicData)
 
             # array integrity check
-            print('array length: ', len(subArray))
             if (len(subArray) == 3):
                 exploitableData.append(subArray)
             else :
