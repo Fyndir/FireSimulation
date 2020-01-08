@@ -171,8 +171,6 @@ function addFirestationMarker (coordinates, mymap) {
 async function fetchAndDisplayIncendie (mymap) {
     fetch('/get').then(r => r.json()).then(data => 
     {
-        console.log('got data')
-        console.log(data)
         if (data.length > 0)
             updateIncendieData(data, mymap)
     })
@@ -192,9 +190,10 @@ function updateIncendieData (newDataset, mymap)
     // render everything
     locationsCoordinates = newDataset;
     clearMap(mymap);
-    for (let triplet of locationsCoordinates) {
-        let coordinates = [triplet[0], triplet[1]];
-        let intensity = triplet[2];
+    for (let quadruplet of locationsCoordinates) {
+        let id = quadruplet[0];
+        let coordinates = [quadruplet[1], quadruplet[2]];
+        let intensity = quadruplet[3];
         if (intensity > 0)
             addFireMarker(coordinates, intensity, mymap)
         else

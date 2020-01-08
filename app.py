@@ -59,12 +59,12 @@ def handlePostData():
                     subArray.append(atomicData)
 
             # array integrity check
-            if (len(subArray) == 3):
+            if (len(subArray) == 4):
                 exploitableData.append(subArray)
 
-        # sinon, on a envoyé plusieurs triplets, donc simplement faut les traiter un par un
+        # sinon, on a envoyé plusieurs quadruplets, donc simplement faut les traiter un par un
         else:
-            print('envoyé plusieurs triplets')
+            print('envoyé plusieurs quadruplets')
             for data in rawData.split(';'):
                 subArray = []
                 for atomicData in data.split(','):
@@ -72,7 +72,7 @@ def handlePostData():
                         subArray.append(atomicData)
 
                 # array integrity check
-                if (len(subArray) == 3):
+                if (len(subArray) == 4):
                     exploitableData.append(subArray)
                 else :
                     raise NameError('Mauvais typage')
